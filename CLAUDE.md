@@ -1,15 +1,72 @@
-# TEC Domain App Template — Claude Code Instructions
+# TEC Elite — Claude Code Instructions
 
-## What This Repo Is
+> ⚡ **SESSION START:** اقرأ `knowledge-base/C-02___CURRENT_STATE_.md` + **app charter
+> `knowledge-base/C-127___ELITE_EXCELLENCE_RUNTIME.md`** من `yasira82/tec-knowledge-base` (branch: `main`).
 
-The **golden starter template** for a new app in the TEC Federated Platform.
-It ships a correct, Portal-ready skeleton: Hub SSO, dual-mode Pi payments,
-CSRF, legal pages, and CI policy guards. Clone it, run the "New app setup"
-checklist below, and you have a compliant app — no missing pieces.
+## What This App Is
 
-**Reference of record:** `yasira82/tec-knowledge-base` — especially
-`C-12_Dual_Mode_Payment.md` (payment + anti-regression) and
-`audits/PORTAL_SUBMISSION_RUNBOOK_*.md`.
+**The Excellence Runtime** of the Pi economy (C-127) — the **System of
+Recognition**. Elite answers one question:
+
+```
+"Are you among the best?"
+```
+
+Elite officially recognizes top performers based on **verified evidence, never
+self-promotion or paid placement**. It is the middle link of the value chain
+**Legend (evidence) → Elite (recognition) → VIP (experience)**.
+
+Built from `tec-template-base` (Next.js 15 frontend).
+
+**Current Phase: Elite V0/V1 — Recognition preview (read-only).** Identity /
+domain / slug / legal + a themed **recognition home** (programs · tiers
+BRONZE→PLATINUM · criteria-met status) + a `/recognition/[id]` detail page (full
+criteria breakdown) + **Elite Certificate** (the Pi Portal "Process a
+Transaction" gate — an *adjacent* premium, NOT recognition for sale). Real
+recognition (Analytics-evaluated criteria + human review) is Phase 3. Not deployed.
+
+---
+
+## Pi App Identity
+
+| Field | Value |
+|-------|-------|
+| **App** | TEC Elite |
+| **Domain** | `https://elite.tecosystem.app` |
+| **Pi App ID** | ⏳ TBD — register at Pi Developer Portal · then Vercel `NEXT_PUBLIC_PI_APP_ID` |
+| **APP_SOURCE slug** | `elite` (payment-service resolves `PI_API_KEY_ELITE`) |
+| **PI_SANDBOX** | `false` (Mainnet) |
+
+---
+
+## Elite-Specific Rules (C-127)
+
+### 🔴 Constitutional rule — recognition is CRITERIA-BASED, earned not bought
+Elite recognition **cannot be purchased** — it is **free** and granted only when
+**all criteria pass**. No overrides, no paid placement. The pipeline:
+- **Evidence** → Legend (C-126) provides the achievement record.
+- **Criteria evaluation** → Analytics (C-105) computes whether thresholds are met.
+- **Thresholds / governance** → System (C-110) sets and governs them.
+- **GOLD + PLATINUM** additionally require **human review** (1 reviewer / 3-person panel).
+
+The only paid surface is an **Elite-adjacent** premium (a printable / NFT
+certificate of a recognition already earned) — never the recognition itself.
+
+### The ownership boundary
+Elite **OWNS**: recognition programs + tiers, recognition records + lifecycle,
+certificates/badges. Elite does **NOT OWN**:
+- **Score computation** → Analytics. **Achievement records** → Legend.
+- **Identity / verification** → Hub + Zone. **Benefit delivery** → VIP (C-128).
+- **Governance** → System. **Economic execution** → payment-service.
+
+### Isolation (P6)
+A user sees their OWN recognitions — identity from the `tec_user` session cookie
+server-side, **never** a query param or body. Public verification (is X Elite?) is
+allowed read-only. No session → own-scope fails closed.
+
+**Reference of record:** `yasira82/tec-knowledge-base` —
+`C-127___ELITE_EXCELLENCE_RUNTIME.md` (charter) + `C-12_Dual_Mode_Payment.md`
+(payment anti-regression) + `C-123` (session/cookies).
 
 ---
 
@@ -43,6 +100,9 @@ if (isHubNavigation() || !(window as any).Pi || !piReady) {
 }
 // Mode 2: standalone — createPaymentRecord() then createU2APayment() (src/lib/pi-payment.ts)
 ```
+> Elite Certificate (adjacent premium) is the only buy flow — never recognition
+> itself. Approve under `PI_API_KEY_ELITE` (never the default Hub key — the
+> Analytics approve→502 lesson, C-12 §11).
 
 ### ADR-009 — Unified payment contract
 `amount` is a **number**; gateway path is **`/api/payment/*`** (singular); the only
@@ -61,67 +121,52 @@ Identity is derived from the `tec_user` cookie server-side — **never from the 
 
 ---
 
-## What's included
+## Setup status + Roadmap (C-127)
 
 ```
-middleware.ts                              CSRF (double-submit OR Origin) + page guard
-src/app/api/auth/sso-callback/route.ts     Hub SSO landing (open-redirect-safe)
-src/app/api/auth/refresh/route.ts          token refresh
-src/app/api/bff/payment/{create,approve,complete,resolve-incomplete}/route.ts
-src/app/api/bff/items/route.ts             example domain route (copy this pattern)
-src/app/api/health/route.ts                health endpoint (C-92/C-96) — fail-safe, public, never 500s
-src/lib/pi-payment.ts                      createPaymentRecord + createU2APayment
-src/lib/pi/PiRuntime.ts                    PAL — single choke-point for window.Pi.* (R1)
-src/lib/pi/PiCircuitBreaker.ts             CLOSED→OPEN→HALF_OPEN (3 fails → 60s)
-src/lib/flags.ts                           feature flags (NEXT_PUBLIC_FLAG_*) + useFlag
-src/lib/observability/logger.ts            structured JSON logger (log.info/warn/error) — no silent failures (C-96)
-src/lib/observability/reportError.ts       Sentry-ready error reporter (single swap-point)
-src/app/privacy/page.tsx · terms/page.tsx  Pi Portal legal pages
-src/styles/tec-design-tokens.css           import in app/layout.tsx
-.github/workflows/ci.yml                   payment-policy + CSRF guard + lint/typecheck/test/build
-```
+Elite V0/V1 — Recognition preview (customized from template):
+  ✅ package.json name = tec-elite · APP_SOURCE = 'elite'
+  ✅ sso-callback ALLOWED_AUDIENCES → elite.tecosystem.app + tec-elite.vercel.app
+  ✅ privacy + terms → TEC Elite / elite.tecosystem.app
+  ✅ NEW-A: no NEXT_PUBLIC_API_GATEWAY_URL / Railway host in the client bundle
+  ✅ /app themed: recognition programs + tiers + criteria status + Elite Certificate (real Pi U2A)
+  ✅ /recognition/[id] detail (full criteria breakdown) + BFF /api/bff/elite/recognition
 
-**v2 (production-ready by default):** every new app ships
-- `/api/health` — uniform C-92 signal (platform health runtime + observability scrape + SLO/runtime-evidence loop);
-- structured `log` + `reportError` — use `log.error`/`reportError` in catch blocks (a silent error handler is an invisible failure, C-96; `reportError` is the one place to wire Sentry per app);
-- `PiRuntime` (PAL) + `PiCircuitBreaker` — never call `window.Pi.*` directly; go through PiRuntime so an SDK change is a one-file fix (R1) and flapping is contained;
-- `flags.ts` — feature flags from day one (`NEXT_PUBLIC_FLAG_<NAME>`);
-- coverage gate — `npm run test:coverage` (add devDep `@vitest/coverage-v8`; 60% floor, raise as the app grows).
+Next (before live):
+  □ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +
+    API_GATEWAY_URL · INTERNAL_SECRET · SSO_SECRET · PI_SANDBOX=false.
+  □ payment-service: set PI_API_KEY_ELITE on Railway (approve→502 otherwise, C-12 §11).
+  □ Hub SSO: add elite.tecosystem.app + tec-elite.vercel.app to Hub /api/auth/sso
+    ALLOWED_TARGETS + Hub domain registry.
+  □ Deploy (Vercel) + runtime-verify login (C-123) + a real Elite Certificate payment
+    Mode 1 (Hub) AND Mode 2 (standalone).
 
----
-
-## New app setup checklist
-
-```
-□ package.json: set "name"
-□ middleware.ts: adjust PROTECTED_ROUTES
-□ sso-callback/route.ts: set ALLOWED_AUDIENCES + DEFAULT_REDIRECT to your domain
-□ src/lib/pi-payment.ts + payment/create: set APP_SOURCE slug
-□ privacy/page.tsx + terms/page.tsx: set APP / DOMAIN / governing law / contacts
-□ Add ADR-007 isHubNavigation() guard to every buy handler
-□ .env: API_GATEWAY_URL · INTERNAL_SECRET · SSO_SECRET · NEXT_PUBLIC_PI_APP_ID · PI_SANDBOX=false (prod)
-□ Pi Developer Portal: register domain + App ID; set /privacy + /terms URLs
-□ Verify a real Pi payment Mode 1 (via Hub) AND Mode 2 (standalone)
+Elite V1+ (post-Portal — C-127): Analytics-evaluated criteria (daily/weekly/monthly
+  by tier) → CANDIDATE flagging → human review (GOLD/PLATINUM) → certificate issuance
+  → renewal cycles. Gated on Legend + Analytics + Zone operational + 5k users.
 ```
 
 ---
 
 ## What NOT To Do
 
+- Do NOT sell or grant recognition for payment — criteria-based only, free (C-127)
+- Do NOT compute scores in Elite — Analytics evaluates; Legend supplies evidence
+- Do NOT auto-grant GOLD/PLATINUM — they require human review
+- Do NOT mint verification — present Zone's verified flag, never create it
 - Do NOT validate CSRF in a route handler — middleware only (CI blocks it)
 - Do NOT send `amount` as a string, or use `/payments` / `x-service-secret`
 - Do NOT skip the ADR-007 `isHubNavigation()` guard before `window.Pi`
 - Do NOT store tokens in localStorage; do NOT derive identity from the body
 - Do NOT add `NEXT_PUBLIC_*` for internal service URLs or `INTERNAL_SECRET`
-- Do NOT use an open `redirect` param without the same-origin guard (open redirect)
 
 ---
 
 ## Commit Convention
 
 ```
-feat(scope):  new feature      fix(payment): payment flow fix (test carefully)
-fix(scope):   bug fix          chore(scope): build/config
+feat(elite):  new recognition feature   fix(payment): payment flow fix (test carefully)
+fix(elite):   bug fix                    chore(scope):  build/config
 ```
 
 ---

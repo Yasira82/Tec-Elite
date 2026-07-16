@@ -1,70 +1,74 @@
 'use client';
 
-// Example protected page demonstrating the canonical ADR-007 dual-mode buy flow.
-// Copy this handler into your real product/checkout components.
-import { useEffect, useState } from 'react';
+// TEC Elite — Recognition home (C-127), read-only V1.
+// Official, criteria-based recognition from verified evidence — earned, never
+// bought. Middle link of Legend (evidence) → Elite (recognition) → VIP (experience).
+import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import {
-  isHubNavigation,
-  redirectToHubPayment,
-  createPaymentRecord,
-  createU2APayment,
-} from '@/lib/pi-payment';
+import { RECOGNITIONS, PROGRAM_META, TIER_META, STATUS_META } from '@/lib/elite/recognition';
+import ElitePro from './components/ElitePro';
 
-// TODO(new app): replace with real items from your BFF (/api/bff/items).
-const DEMO_ITEM = { id: 'demo-1', name: 'Demo Item', price: 1 };
-
-export default function AppHomePage() {
-  const [piReady, setPiReady] = useState(false);
-  const [status, setStatus]   = useState<string>('');
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if ((window as { __TEC_PI_READY?: boolean }).__TEC_PI_READY) setPiReady(true);
-    const onReady = () => setPiReady(true);
-    window.addEventListener('tec-pi-ready', onReady);
-    return () => window.removeEventListener('tec-pi-ready', onReady);
-  }, []);
-
-  const handleBuy = async () => {
-    const { id, name, price } = DEMO_ITEM;
-
-    // ── ADR-007 guard — ALWAYS keep this before touching window.Pi ──
-    if (isHubNavigation() || !(window as { Pi?: unknown }).Pi || !piReady) {
-      redirectToHubPayment({ amount: price, itemId: id, memo: name });   // Mode 1
-      return;
-    }
-
-    // ── Mode 2: standalone Pi Browser payment ──
-    setStatus('Creating payment…');
-    const internalId = await createPaymentRecord(price, id, name);
-    if (!internalId) { setStatus('Could not start payment.'); return; }
-
-    setStatus('Awaiting Pi approval…');
-    const result = await createU2APayment(price, name, { item_id: id }, internalId);
-    setStatus(
-      result.success ? `✅ Paid — txid ${result.txid}` :
-      result.status === 'cancelled' ? 'Payment cancelled.' :
-      `❌ ${result.message ?? 'Payment failed.'}`,
-    );
-    // On success, create the domain record: POST /api/bff/items { ..., payment_id: internalId }
-  };
+export default function EliteHome() {
+  const active = RECOGNITIONS.filter((r) => r.status === 'ACTIVE');
+  const candidates = RECOGNITIONS.filter((r) => r.status === 'CANDIDATE');
 
   return (
-    <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: 32, fontFamily: 'system-ui, sans-serif' }}>
-      <h1 style={{ color: TEC_COLORS.gold }}>TEC App</h1>
-      <p style={{ opacity: 0.7 }}>Pi SDK: {piReady ? 'ready' : 'loading…'}</p>
+    <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+        <header style={{ marginBottom: 8 }}>
+          <div style={{ fontSize: 34 }}>🎖️</div>
+          <h1 style={{ color: TEC_COLORS.gold, margin: '4px 0 2px', fontSize: 26 }}>TEC Elite</h1>
+          <p style={{ opacity: 0.7, margin: 0, fontSize: 14 }}>
+            Excellence Runtime — evidence before recognition. Earned, never bought.
+          </p>
+        </header>
 
-      <div style={{ marginTop: 24, padding: 20, background: TEC_COLORS.surface, borderRadius: 12, maxWidth: 360 }}>
-        <h2 style={{ margin: 0 }}>{DEMO_ITEM.name}</h2>
-        <p style={{ color: TEC_COLORS.gold }}>π {DEMO_ITEM.price}</p>
-        <button
-          onClick={handleBuy}
-          style={{ background: TEC_COLORS.goldDark, color: '#020205', border: 'none', borderRadius: 8, padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}
-        >
-          Buy with Pi
-        </button>
-        {status && <p style={{ marginTop: 12 }}>{status}</p>}
+        {/* Chain explainer */}
+        <div style={{ marginTop: 20, padding: '12px 16px', background: TEC_COLORS.surface, borderRadius: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', fontSize: 13 }}>
+          {['Legend · Evidence', 'Elite · Recognition', 'VIP · Experience'].map((s, i, a) => (
+            <span key={s} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: i === 1 ? TEC_COLORS.gold : '#9ca3af' }}>{s}</span>
+              {i < a.length - 1 && <span style={{ opacity: 0.4 }}>→</span>}
+            </span>
+          ))}
+        </div>
+
+        {/* Active recognitions */}
+        <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 28, marginBottom: 12 }}>Your recognitions</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 14 }}>
+          {[...active, ...candidates].map((r) => {
+            const pm = PROGRAM_META[r.program]; const tm = TIER_META[r.tier]; const sm = STATUS_META[r.status];
+            const passed = r.criteria.filter((c) => c.passed).length;
+            return (
+              <Link key={r.id} href={`/recognition/${r.id}`} style={{ textDecoration: 'none' }}>
+                <div style={{ padding: 16, background: TEC_COLORS.surface, borderRadius: 12, border: `1px solid ${tm.tone}33`, height: '100%' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 20 }}>{pm.icon}</span>
+                    <span style={{ fontSize: 11, color: sm.tone, border: `1px solid ${sm.tone}55`, borderRadius: 20, padding: '2px 8px' }}>{sm.label}</span>
+                  </div>
+                  <div style={{ color: '#e7e7ea', fontWeight: 700, marginTop: 10 }}>{pm.label}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: tm.tone }}>{tm.label}</span>
+                    <span style={{ fontSize: 11, opacity: 0.6 }}>· {tm.band}</span>
+                  </div>
+                  <div style={{ opacity: 0.55, fontSize: 11, marginTop: 10 }}>
+                    Criteria {passed}/{r.criteria.length} · {r.grantedBy === 'PANEL' ? 'human review' : 'auto'}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
+          <strong>Earned, not bought (C-127).</strong> Recognition is criteria-based only — no overrides,
+          no paid placement. Evidence comes from Legend, criteria are evaluated by Analytics, thresholds are
+          governed by System; Gold/Platinum add human review. Elite recognition itself is free. Read-only sample.
+        </p>
+
+        {/* Elite certificate (adjacent premium — NOT recognition for sale) */}
+        <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 32, marginBottom: 12 }}>Certificate</h2>
+        <ElitePro />
       </div>
     </main>
   );
