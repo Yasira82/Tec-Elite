@@ -3,14 +3,27 @@
 // TEC Elite — Recognition home (C-127), read-only V1.
 // Official, criteria-based recognition from verified evidence — earned, never
 // bought. Middle link of Legend (evidence) → Elite (recognition) → VIP (experience).
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { RECOGNITIONS, PROGRAM_META, TIER_META, STATUS_META } from '@/lib/elite/recognition';
+import { RECOGNITIONS, PROGRAM_META, TIER_META, STATUS_META, type Recognition } from '@/lib/elite/recognition';
 import ElitePro from './components/ElitePro';
 
 export default function EliteHome() {
-  const active = RECOGNITIONS.filter((r) => r.status === 'ACTIVE');
-  const candidates = RECOGNITIONS.filter((r) => r.status === 'CANDIDATE');
+  // The caller's OWN recognitions — fetched from the BFF (identity from the session
+  // cookie, P6), falling back to the curated sample so the page is never blank.
+  const [recognitions, setRecognitions] = useState<Recognition[]>(RECOGNITIONS);
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/bff/elite/recognition', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive && Array.isArray(d?.recognitions)) setRecognitions(d.recognitions); })
+      .catch(() => { /* keep the sample */ });
+    return () => { alive = false; };
+  }, []);
+
+  const active = recognitions.filter((r) => r.status === 'ACTIVE');
+  const candidates = recognitions.filter((r) => r.status === 'CANDIDATE');
 
   return (
     <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>

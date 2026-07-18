@@ -3,11 +3,15 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { RECOGNITIONS, getRecognition, PROGRAM_META, TIER_META, STATUS_META } from '@/lib/elite/recognition';
+import { RECOGNITIONS, PROGRAM_META, TIER_META, STATUS_META } from '@/lib/elite/recognition';
+import { resolveRecognition } from '@/lib/elite/server';
 
+// Pre-render the curated sample slugs; allow live-only backend recognitions to
+// render on demand (the Elite read-layer is the record of record — C-127).
 export function generateStaticParams() {
   return RECOGNITIONS.map((r) => ({ id: r.id }));
 }
+export const dynamicParams = true;
 
 function fmt(v: number | boolean): string {
   return typeof v === 'boolean' ? (v ? 'yes' : 'no') : String(v);
@@ -15,7 +19,9 @@ function fmt(v: number | boolean): string {
 
 export default async function RecognitionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const r = getRecognition(id);
+  // Resolve from the live Elite read-layer; fall back to the curated sample so the
+  // page never 500s. A live 404 is authoritative → notFound().
+  const { recognition: r } = await resolveRecognition(id);
   if (!r) notFound();
 
   const pm = PROGRAM_META[r.program];
