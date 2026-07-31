@@ -4,6 +4,7 @@
 // Official, criteria-based recognition from verified evidence — earned, never
 // bought. Middle link of Legend (evidence) → Elite (recognition) → VIP (experience).
 import { useEffect, useState } from 'react';
+import { InviteCard } from '@/components/referral/InviteCard';
 import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { PROGRAM_META, TIER_META, STATUS_META, type Recognition } from '@/lib/elite/recognition';
@@ -118,6 +119,7 @@ export default function EliteHome() {
         {/* Elite certificate (adjacent premium — NOT recognition for sale) */}
         <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 32, marginBottom: 12 }}>Certificate</h2>
         <ElitePro />
+        <InviteCard />
       </div>
     </main>
   );

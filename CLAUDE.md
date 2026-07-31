@@ -23,7 +23,7 @@ domain / slug / legal + a themed **recognition home** (programs · tiers
 BRONZE→PLATINUM · criteria-met status) + a `/recognition/[id]` detail page (full
 criteria breakdown) + **Elite Certificate** (the Pi Portal "Process a
 Transaction" gate — an *adjacent* premium, NOT recognition for sale). Real
-recognition (Analytics-evaluated criteria + human review) is Phase 3. Not deployed.
+recognition (Analytics-evaluated criteria + human review) is Phase 3. Deployed (Mainnet) · Pi App ID registered · env set · payment live · referral growth loop wired (C-133).
 
 ---
 
@@ -33,7 +33,7 @@ recognition (Analytics-evaluated criteria + human review) is Phase 3. Not deploy
 |-------|-------|
 | **App** | TEC Elite |
 | **Domain** | `https://elite.tecosystem.app` |
-| **Pi App ID** | ⏳ TBD — register at Pi Developer Portal · then Vercel `NEXT_PUBLIC_PI_APP_ID` |
+| **Pi App ID** | ✅ Registered (Mainnet) · Vercel `NEXT_PUBLIC_PI_APP_ID` |
 | **APP_SOURCE slug** | `elite` (payment-service resolves `PI_API_KEY_ELITE`) |
 | **PI_SANDBOX** | `false` (Mainnet) |
 
