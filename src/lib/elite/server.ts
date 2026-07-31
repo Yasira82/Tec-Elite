@@ -1,13 +1,13 @@
 import {
-  RECOGNITIONS, getRecognition,
   type Recognition, type EliteProgram, type EliteTier,
   type RecognitionStatus, type CriterionResult,
 } from './recognition';
 
 // Server-only Elite backend access (C-127). Calls the real Elite read-layer
 // (identity-service) via the gateway with the inter-service key, and maps the
-// backend rows to the frontend shape. Everything degrades to the curated sample so
-// the page is never blank / never 500s. NEW-A: the gateway URL is server-only
+// backend rows to the frontend shape. Real data end-to-end (C-135 §4): an
+// unreachable backend / no session resolves to `unavailable` (no recognitions) —
+// never a fabricated sample. NEW-A: the gateway URL is server-only
 // (API_GATEWAY_URL) — never shipped to the client.
 const GW = process.env.API_GATEWAY_URL ?? '';
 
@@ -49,12 +49,13 @@ export function recognitionFromBackend(r: Record<string, unknown>): Recognition 
 
 export interface ResolvedRecognitions {
   recognitions: Recognition[];
-  source:       'live' | 'sample';
+  source:       'live' | 'unavailable';
 }
 
-// The caller's OWN recognitions — live backend first, curated sample as fallback.
-// `owner` is derived from the session by the BFF (never a client param, P6); when
-// absent or unknown, the sample is served so the page is never blank.
+// The caller's OWN recognitions — live backend only. `owner` is derived from the
+// session by the BFF (never a client param, P6). No session or an unreachable
+// backend resolves to (recognitions: [], source: 'unavailable') so the page shows
+// an honest empty state — never a fabricated sample (C-135 §4).
 export async function resolveOwnRecognitions(owner: string | null): Promise<ResolvedRecognitions> {
   if (GW && owner) {
     try {
@@ -68,18 +69,19 @@ export async function resolveOwnRecognitions(owner: string | null): Promise<Reso
           return { recognitions: rows.map((r) => recognitionFromBackend(r as Record<string, unknown>)), source: 'live' };
         }
       }
-    } catch { /* fall through to the curated sample */ }
+    } catch { /* unreachable → unavailable below */ }
   }
-  return { recognitions: RECOGNITIONS, source: 'sample' };
+  return { recognitions: [], source: 'unavailable' };
 }
 
 export interface ResolvedRecognition {
   recognition: Recognition | null;
-  source:      'live' | 'sample';
+  source:      'live' | 'unavailable';
 }
 
-// One recognition by slug — live backend first, sample fallback. A live 404 is
-// authoritative (recognition: null, source: 'live'). Publicly verifiable ("is X Elite?").
+// One recognition by slug — live backend only. A live 404 is authoritative
+// (recognition: null, source: 'live'); an unreachable backend resolves to
+// (recognition: null, source: 'unavailable'). Publicly verifiable ("is X Elite?").
 export async function resolveRecognition(id: string): Promise<ResolvedRecognition> {
   if (GW) {
     try {
@@ -92,7 +94,7 @@ export async function resolveRecognition(id: string): Promise<ResolvedRecognitio
         if (r) return { recognition: recognitionFromBackend(r as Record<string, unknown>), source: 'live' };
       }
       if (res.status === 404) return { recognition: null, source: 'live' };
-    } catch { /* fall through to the curated sample */ }
+    } catch { /* unreachable → unavailable below */ }
   }
-  return { recognition: getRecognition(id), source: 'sample' };
+  return { recognition: null, source: 'unavailable' };
 }

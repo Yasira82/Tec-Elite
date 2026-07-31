@@ -6,8 +6,9 @@ import { resolveOwnRecognitions } from '@/lib/elite/server';
 // evidence from Legend, criteria evaluated by Analytics, thresholds governed by
 // System, GOLD/PLATINUM human-reviewed. Identity is derived from the `tec_user`
 // session cookie server-side — NEVER a query param or body (P6). The owner is passed
-// to the backend; on no session / unreachable backend, the curated sample is served
-// so the page is never blank. Elite never computes scores or records achievements.
+// to the backend; on no session / unreachable backend the source is 'unavailable'
+// with no recognitions (honest empty state, C-135 §4) — never a fabricated sample.
+// Elite never computes scores or records achievements.
 function ownerFromSession(req: NextRequest): string | null {
   try {
     const raw = req.cookies.get('tec_user')?.value ?? '';
