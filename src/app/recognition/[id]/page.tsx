@@ -1,17 +1,14 @@
-// TEC Elite — recognition detail (C-127), read-only, statically generated.
-// Shows the criteria breakdown: recognition is criteria-based only.
+// TEC Elite — recognition detail (C-127), read-only. Shows the criteria breakdown:
+// recognition is criteria-based only. Rendered dynamically from the live Elite
+// read-layer — real data end-to-end (C-135 §4): a live 404 is "not found"; an
+// unreachable backend is an honest "couldn't load". Never a fabricated sample.
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { RECOGNITIONS, PROGRAM_META, TIER_META, STATUS_META } from '@/lib/elite/recognition';
+import { PROGRAM_META, TIER_META, STATUS_META } from '@/lib/elite/recognition';
 import { resolveRecognition } from '@/lib/elite/server';
 
-// Pre-render the curated sample slugs; allow live-only backend recognitions to
-// render on demand (the Elite read-layer is the record of record — C-127).
-export function generateStaticParams() {
-  return RECOGNITIONS.map((r) => ({ id: r.id }));
-}
-export const dynamicParams = true;
+export const dynamic = 'force-dynamic';
 
 function fmt(v: number | boolean): string {
   return typeof v === 'boolean' ? (v ? 'yes' : 'no') : String(v);
@@ -19,10 +16,23 @@ function fmt(v: number | boolean): string {
 
 export default async function RecognitionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  // Resolve from the live Elite read-layer; fall back to the curated sample so the
-  // page never 500s. A live 404 is authoritative → notFound().
-  const { recognition: r } = await resolveRecognition(id);
-  if (!r) notFound();
+  const { recognition: r, source } = await resolveRecognition(id);
+
+  if (!r) {
+    if (source === 'live') notFound();
+    return (
+      <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <Link href="/app" style={{ color: TEC_COLORS.gold, fontSize: 13, textDecoration: 'none' }}>← Back</Link>
+          <div style={{ marginTop: 40, padding: '40px 24px', background: TEC_COLORS.surface, borderRadius: 14, textAlign: 'center' }}>
+            <div style={{ fontSize: 28 }}>🎖️</div>
+            <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>Couldn&apos;t load this recognition</div>
+            <p style={{ opacity: 0.65, fontSize: 13.5, marginTop: 6 }}>The Elite read-layer is unavailable right now. Please try again.</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const pm = PROGRAM_META[r.program];
   const tm = TIER_META[r.tier];

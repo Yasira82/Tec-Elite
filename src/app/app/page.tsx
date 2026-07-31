@@ -6,19 +6,28 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { RECOGNITIONS, PROGRAM_META, TIER_META, STATUS_META, type Recognition } from '@/lib/elite/recognition';
+import { PROGRAM_META, TIER_META, STATUS_META, type Recognition } from '@/lib/elite/recognition';
 import ElitePro from './components/ElitePro';
 
 export default function EliteHome() {
-  // The caller's OWN recognitions — fetched from the BFF (identity from the session
-  // cookie, P6), falling back to the curated sample so the page is never blank.
-  const [recognitions, setRecognitions] = useState<Recognition[]>(RECOGNITIONS);
+  // Real data end-to-end (C-135 §4): the caller's OWN recognitions (identity from
+  // the session cookie, P6) or an honest empty state — never a fabricated sample.
+  const [recognitions, setRecognitions] = useState<Recognition[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
   useEffect(() => {
     let alive = true;
     fetch('/api/bff/elite/recognition', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (alive && Array.isArray(d?.recognitions)) setRecognitions(d.recognitions); })
-      .catch(() => { /* keep the sample */ });
+      .then((d) => {
+        if (!alive) return;
+        if (d && d.source === 'live' && Array.isArray(d.recognitions)) {
+          setRecognitions(d.recognitions);
+          setStatus('ready');
+        } else {
+          setStatus('unavailable');
+        }
+      })
+      .catch(() => { if (alive) setStatus('unavailable'); });
     return () => { alive = false; };
   }, []);
 
@@ -48,6 +57,32 @@ export default function EliteHome() {
 
         {/* Active recognitions */}
         <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 28, marginBottom: 12 }}>Your recognitions</h2>
+
+        {status === 'loading' && (
+          <div style={{ padding: 30, textAlign: 'center', opacity: 0.6, fontSize: 14 }}>Loading your recognitions…</div>
+        )}
+        {status === 'unavailable' && (
+          <div style={{ padding: '36px 24px', background: TEC_COLORS.surface, borderRadius: 12, textAlign: 'center' }}>
+            <div style={{ fontSize: 26 }}>🎖️</div>
+            <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>No recognitions yet</div>
+            <p style={{ opacity: 0.65, fontSize: 13, lineHeight: 1.6, maxWidth: 420, margin: '8px auto 0' }}>
+              Sign in with Pi to see your Elite recognitions. Recognition is earned from verified evidence
+              (Legend) evaluated against governed criteria (Analytics · System) — it appears here once you qualify.
+            </p>
+          </div>
+        )}
+        {status === 'ready' && active.length === 0 && candidates.length === 0 && (
+          <div style={{ padding: '36px 24px', background: TEC_COLORS.surface, borderRadius: 12, textAlign: 'center' }}>
+            <div style={{ fontSize: 26 }}>🎖️</div>
+            <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>No recognitions yet</div>
+            <p style={{ opacity: 0.65, fontSize: 13, lineHeight: 1.6, maxWidth: 420, margin: '8px auto 0' }}>
+              Keep building verified evidence across the ecosystem — recognition is criteria-based and appears
+              here automatically once you meet a program’s thresholds.
+            </p>
+          </div>
+        )}
+
+        {status === 'ready' && (active.length > 0 || candidates.length > 0) && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 14 }}>
           {[...active, ...candidates].map((r) => {
             const pm = PROGRAM_META[r.program]; const tm = TIER_META[r.tier]; const sm = STATUS_META[r.status];
@@ -72,11 +107,12 @@ export default function EliteHome() {
             );
           })}
         </div>
+        )}
 
         <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           <strong>Earned, not bought (C-127).</strong> Recognition is criteria-based only — no overrides,
           no paid placement. Evidence comes from Legend, criteria are evaluated by Analytics, thresholds are
-          governed by System; Gold/Platinum add human review. Elite recognition itself is free. Read-only sample.
+          governed by System; Gold/Platinum add human review. Elite recognition itself is free.
         </p>
 
         {/* Elite certificate (adjacent premium — NOT recognition for sale) */}
