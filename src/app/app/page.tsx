@@ -42,7 +42,7 @@ export default function EliteHome() {
           <div style={{ fontSize: 34 }}>🎖️</div>
           <h1 style={{ color: TEC_COLORS.gold, margin: '4px 0 2px', fontSize: 26 }}>TEC Elite</h1>
           <p style={{ opacity: 0.7, margin: 0, fontSize: 14 }}>
-            Excellence Runtime — evidence before recognition. Earned, never bought.
+            Recognition, earned — evidence before recognition, never bought.
           </p>
         </header>
 
@@ -113,7 +113,7 @@ export default function EliteHome() {
         <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           <strong>Earned, not bought.</strong> Recognition is criteria-based only — no overrides,
           no paid placement. Evidence comes from Legend, criteria are evaluated by Analytics, thresholds are
-          governed by System; Gold/Platinum add human review. Elite recognition itself is free.
+          no shortcuts. Gold and Platinum add a human review. Recognition itself is always free.
         </p>
 
         {/* Elite certificate (adjacent premium — NOT recognition for sale) */}

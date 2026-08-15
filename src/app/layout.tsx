@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import '@/styles/tec-design-tokens.css';
 
 export const metadata: Metadata = {
-  title:       'TEC Elite — Excellence Runtime',
+  title:       'TEC Elite — Recognition',
   description: 'TEC Elite — official, criteria-based recognition earned from verified evidence (read-only).',
 };
 
