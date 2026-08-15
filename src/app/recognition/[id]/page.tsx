@@ -76,8 +76,8 @@ export default async function RecognitionDetail({ params }: { params: Promise<{ 
         </div>
 
         <p style={{ marginTop: 20, fontSize: 12, opacity: 0.55, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
-          {r.status === 'CANDIDATE'
-            ? 'Candidate — some criteria are not yet met, or human review is pending. Recognition is granted only when ALL criteria pass (C-127).'
+          {r.status === 'CANDIDATE'?
+            'Candidate — some criteria are not yet met, or human review is pending. Recognition is granted only when ALL criteria pass.'
             : 'Criteria are evaluated on rolling periods by Analytics from Legend evidence; thresholds are governed by System. Recognition is earned, never bought.'}
         </p>
       </div>

@@ -111,7 +111,7 @@ export default function EliteHome() {
         )}
 
         <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
-          <strong>Earned, not bought (C-127).</strong> Recognition is criteria-based only — no overrides,
+          <strong>Earned, not bought.</strong> Recognition is criteria-based only — no overrides,
           no paid placement. Evidence comes from Legend, criteria are evaluated by Analytics, thresholds are
           governed by System; Gold/Platinum add human review. Elite recognition itself is free.
         </p>
