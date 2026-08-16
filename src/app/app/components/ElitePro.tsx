@@ -105,7 +105,7 @@ export default function ElitePro() {
         A printable / NFT certificate of an Elite recognition you have already earned.
       </p>
       <p style={{ opacity: 0.55, fontSize: 11.5, margin: '0 0 14px' }}>
-        Recognition itself is free and cannot be bought — only earned from evidence (C-127).
+        Recognition itself is free and cannot be bought — only earned from evidence.
       </p>
       <button
         onClick={handleBuy}
