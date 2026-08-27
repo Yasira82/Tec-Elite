@@ -104,13 +104,13 @@ export const PROGRAM_META: Record<EliteProgram, { label: string; icon: string }>
 export const TIER_META: Record<EliteTier, { label: string; band: string; tone: string }> = {
   BRONZE:   { label: 'Bronze',   band: 'Top 10%',  tone: '#CD7F32' },
   SILVER:   { label: 'Silver',   band: 'Top 5%',   tone: '#C0C0C0' },
-  GOLD:     { label: 'Gold',     band: 'Top 1%',   tone: '#FBBF24' },
+  GOLD:     { label: 'Gold',     band: 'Top 1%',   tone: '#FBB44A' },
   PLATINUM: { label: 'Platinum', band: 'Top 0.1%', tone: '#67E8F9' },
 };
 
 export const STATUS_META: Record<RecognitionStatus, { label: string; tone: string }> = {
   ACTIVE:    { label: 'Active',    tone: '#22C55E' },
-  CANDIDATE: { label: 'Candidate', tone: '#FBBF24' },
+  CANDIDATE: { label: 'Candidate', tone: '#FBB44A' },
   EXPIRED:   { label: 'Expired',   tone: '#9ca3af' },
 };
 
