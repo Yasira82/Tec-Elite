@@ -132,13 +132,13 @@ Elite V0/V1 — Recognition preview (customized from template):
   ✅ /app themed: recognition programs + tiers + criteria status + Elite Certificate (real Pi U2A)
   ✅ /recognition/[id] detail (full criteria breakdown) + BFF /api/bff/elite/recognition
 
-Next (before live):
-  □ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +
+Live on Mainnet — all complete (SSoT: architecture/app-fleet.yaml):
+  ✅ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +
     API_GATEWAY_URL · INTERNAL_SECRET · SSO_SECRET · PI_SANDBOX=false.
-  □ payment-service: set PI_API_KEY_ELITE on Railway (approve→502 otherwise, C-12 §11).
-  □ Hub SSO: add elite.tecosystem.app + tec-elite.vercel.app to Hub /api/auth/sso
+  ✅ payment-service: set PI_API_KEY_ELITE on Railway (approve→502 otherwise, C-12 §11).
+  ✅ Hub SSO: add elite.tecosystem.app + tec-elite.vercel.app to Hub /api/auth/sso
     ALLOWED_TARGETS + Hub domain registry.
-  □ Deploy (Vercel) + runtime-verify login (C-123) + a real Elite Certificate payment
+  ✅ Deploy (Vercel) + runtime-verify login (C-123) + a real Elite Certificate payment
     Mode 1 (Hub) AND Mode 2 (standalone).
 
 Elite V1+ (post-Portal — C-127): Analytics-evaluated criteria (daily/weekly/monthly
