@@ -8,8 +8,13 @@ import { cookieDomainFor }           from '@/lib/cookie-domain';
 //   LAW 3: embedded contexts require Secure; SameSite=None; Partitioned.
 //   §3:    VERIFIED ENTRY — the landing script confirms the session is
 //          server-visible (/api/auth/me) BEFORE navigating into the app.
+// The Hub signs the allowlist entry it matched as the audience, so this list
+// must carry the app's REAL hosts — Vercel appended a suffix here because the
+// project name `tec-elite` was taken, and the paired Testnet app lives on the
+// suffixed one.
 const ALLOWED_AUDIENCES = [
   'https://tec-elite.vercel.app',
+  'https://tec-elite-bvzb.vercel.app',
   'https://elite.tecosystem.app',
 ];
 const DEFAULT_REDIRECT = '/app';
