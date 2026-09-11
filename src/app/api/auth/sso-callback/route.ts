@@ -17,6 +17,7 @@ const ALLOWED_AUDIENCES = [
   'https://tec-elite.vercel.app',
   'https://tec-elite-bvzb.vercel.app',
   'https://elite.tecosystem.app',
+  'https://elite-test.tecosystem.app',
 ];
 const DEFAULT_REDIRECT = '/app';
 
