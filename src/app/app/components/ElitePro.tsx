@@ -1,24 +1,43 @@
 'use client';
 
-// ElitePro — the real Pi U2A payment surface (the Pi Portal "Process a
-// Transaction" gate). IMPORTANT (C-127): Elite recognition itself is FREE and
-// can NEVER be purchased — it is earned from verified evidence. This is an
-// Elite-ADJACENT premium (enhanced Elite page / printable + NFT certificate),
-// not recognition for sale. Keeps the ADR-007 dual-mode guard.
+// ElitePro — Elite's subscription surface.
+//
+// ── The Elite Certificate buy button was removed, and this is why ───────────────
+//
+// It charged 5π for `elite-certificate` and delivered NOTHING. Not a degraded
+// product — there is no issuance, no record, no download, no backend, nowhere in
+// this repo or in tec-core-backend. The buyer paid and received a status line
+// saying the payment succeeded.
+//
+// `tec-commerce-service` ignoring the payment was CORRECT: a certificate is not a
+// subscription, and C-127 forbids selling recognition. So this was never a parser
+// bug to patch. It was a buy button in front of an unbuilt product.
+//
+// Two honest paths existed — stop the button, or build the issuance. Stopping it is
+// what shipped, for three reasons:
+//
+//   · Selling something that does not exist is not revenue, it is a liability.
+//   · Nothing is lost on compliance. The Pi Portal "Process a Transaction" gate was
+//     passed long ago; it is not re-checked.
+//   · A certificate certifies a recognition the holder has ALREADY EARNED (C-127).
+//     Building the issuance before knowing how many recognitions exist would be
+//     building a product whose addressable buyers might be zero.
+//
+// What replaces it is a sentence that is true, including the part users most need
+// to hear: recognition itself is free and can never be bought.
+//
+// ── If the issuance is built later ─────────────────────────────────────────────
+//
+// The materials already exist: `EliteRecognition` in tec-identity-service carries
+// owner, program, tier, granted_at, slug and the frozen criteria snapshot — every
+// field a certificate would print. The missing pieces are a record of the purchase,
+// a rendered artefact, and a route to fetch it. And the purchase must be gated on
+// actually HOLDING the recognition being certified, or this comes straight back.
+
 import { useEffect, useState } from 'react';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import {
-  isHubNavigation,
-  redirectToHubPayment,
-  createPaymentRecord,
-  createU2APayment,
-} from '@/lib/pi-payment';
-
-const ELITE_CERT = { id: 'elite-certificate', name: 'Elite Certificate (printable)', price: 5 };
 
 export default function ElitePro() {
-  const [piReady, setPiReady] = useState(false);
-
   // Reflect the real subscription (activated by commerce-service when a Pro payment
   // completes). Pro ONLY while the period is live — no auto-renewal / no downgrade job.
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -43,43 +62,10 @@ export default function ElitePro() {
       .catch(() => {});
   }, []);
 
-  const [status, setStatus]   = useState<string>('');
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if ((window as { __TEC_PI_READY?: boolean }).__TEC_PI_READY) setPiReady(true);
-    const onReady = () => setPiReady(true);
-    window.addEventListener('tec-pi-ready', onReady);
-    return () => window.removeEventListener('tec-pi-ready', onReady);
-  }, []);
-
-  const handleBuy = async () => {
-    const { id, name, price } = ELITE_CERT;
-
-    // ── ADR-007 guard — ALWAYS before touching window.Pi ──
-    if (isHubNavigation() || !(window as { Pi?: unknown }).Pi || !piReady) {
-      redirectToHubPayment({ amount: price, itemId: id, memo: name });   // Mode 1
-      return;
-    }
-
-    // ── Mode 2: standalone Pi Browser payment ──
-    setStatus('Creating payment…');
-    const internalId = await createPaymentRecord(price, id, name);
-    if (!internalId) { setStatus('Could not start payment.'); return; }
-
-    setStatus('Awaiting Pi approval…');
-    const result = await createU2APayment(price, name, { item_id: id }, internalId);
-    setStatus(
-      result.success ? `✅ Purchased — txid ${result.txid}` :
-      result.status === 'cancelled' ? 'Payment cancelled.' :
-      `❌ ${result.message ?? 'Payment failed.'}`,
-    );
-  };
-
   if (isSubscribed) {
     return (
       <div style={{ background: TEC_COLORS.surface, border: `1px solid ${TEC_COLORS.gold}55`, borderRadius: 16, padding: 20, marginTop: 24 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: TEC_COLORS.gold }}>★ You’re on Pro</div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: TEC_COLORS.gold }}>★ You&rsquo;re on Pro</div>
         <div style={{ fontSize: 12, color: TEC_COLORS.subtext, marginTop: 6 }}>
           Your subscription is active. Thanks for supporting TEC.
         </div>
@@ -97,27 +83,15 @@ export default function ElitePro() {
       padding: 20, background: TEC_COLORS.surface, borderRadius: 14,
       border: `1px solid ${TEC_COLORS.gold}33`, maxWidth: 440,
     }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <h2 style={{ margin: 0, color: TEC_COLORS.gold, fontSize: 18 }}>Elite Certificate</h2>
-        <span style={{ color: TEC_COLORS.gold, fontWeight: 800 }}>π 5</span>
-      </div>
+      <h2 style={{ margin: 0, color: TEC_COLORS.gold, fontSize: 18 }}>Elite recognition is free</h2>
       <p style={{ opacity: 0.75, fontSize: 13, margin: '8px 0 6px' }}>
-        A printable / NFT certificate of an Elite recognition you have already earned.
+        It is granted when the criteria pass — from verified evidence, never from a
+        payment. There is nothing to buy here, and there never will be.
       </p>
-      <p style={{ opacity: 0.55, fontSize: 11.5, margin: '0 0 14px' }}>
-        Recognition itself is free and cannot be bought — only earned from evidence.
+      <p style={{ opacity: 0.55, fontSize: 11.5, margin: 0 }}>
+        A printable certificate of a recognition you have earned is planned and not
+        yet available. It will be listed here when it exists.
       </p>
-      <button
-        onClick={handleBuy}
-        style={{
-          background: `linear-gradient(135deg, ${TEC_COLORS.gold}, ${TEC_COLORS.goldDark})`,
-          color: '#0a0800', border: 'none', borderRadius: 10,
-          padding: '11px 20px', fontWeight: 700, cursor: 'pointer',
-        }}>
-        Buy certificate with Pi
-      </button>
-      <p style={{ opacity: 0.5, fontSize: 11, marginTop: 10 }}>Pi SDK: {piReady ? 'ready' : 'loading…'}</p>
-      {status && <p style={{ marginTop: 8, fontSize: 13 }}>{status}</p>}
     </div>
   );
 }
