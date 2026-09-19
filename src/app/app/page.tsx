@@ -143,7 +143,9 @@ export default function EliteHome() {
         {/* ── CERTIFICATE ─────────────────────────────────────────── */}
         {tab === 'certificate' && (<>
           <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 12, marginBottom: 12 }}>{t.elite.certificate}</h2>
-          {/* Elite certificate (adjacent premium — NOT recognition for sale) */}
+          {/* The certificate is not purchasable — it was a buy button in front of an
+              unbuilt product, and it now says so. ElitePro still renders here because
+              it also carries the live subscription state. See its header. */}
           <ElitePro />
         </>)}
 
