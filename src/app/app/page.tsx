@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { useTranslation } from '@/lib/i18n';
+import { useMe } from '@/lib-client/hooks/useMe';
 import { PROGRAM_META, TIER_META, STATUS_META, type Recognition } from '@/lib/elite/recognition';
 import ElitePro from './components/ElitePro';
 import { BottomNav, type EliteTab } from './components/BottomNav';
@@ -15,6 +16,7 @@ import { SettingsView } from './components/SettingsView';
 
 export default function EliteHome() {
   const { t } = useTranslation();
+  const me = useMe();   // C19: who is asking decides what an empty page says
   const [tab, setTab] = useState<EliteTab>('home');
 
   // Real data end-to-end (C-135 §4): the caller's OWN recognitions (identity from
@@ -88,11 +90,12 @@ export default function EliteHome() {
           {status === 'unavailable' && (
             <div style={{ padding: '36px 24px', background: TEC_COLORS.surface, borderRadius: 12, textAlign: 'center' }}>
               <div style={{ fontSize: 26 }}>🎖️</div>
-              <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>No recognitions yet</div>
-              <p style={{ opacity: 0.65, fontSize: 13, lineHeight: 1.6, maxWidth: 420, margin: '8px auto 0' }}>
-                Sign in with Pi to see your Elite recognitions. Recognition is earned from verified evidence
-                (Legend) evaluated against governed criteria (Analytics · System) — it appears here once you qualify.
-              </p>
+              {!me.loading && (<>
+                <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>{me.authenticated ? t.elite.loadState.downTitle : t.elite.loadState.signedOutTitle}</div>
+                <p style={{ opacity: 0.65, fontSize: 13, lineHeight: 1.6, maxWidth: 420, margin: '8px auto 0' }}>
+                  {me.authenticated ? t.elite.loadState.down : t.elite.loadState.signedOut}
+                </p>
+              </>)}
             </div>
           )}
           {status === 'ready' && active.length === 0 && candidates.length === 0 && (
