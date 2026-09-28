@@ -24,6 +24,14 @@ export const en = {
   },
   elite: {
     brand:   'TEC Elite',
+    // C19 — "no session" and "signed in, but the backend did not answer" are
+    // different states; both used to say "Sign in with Pi".
+    loadState: {
+      signedOutTitle: 'No recognitions yet',
+      signedOut:      'Sign in with Pi to see your Elite recognitions. Recognition is earned from verified evidence (Legend) against governed criteria (Analytics · System) — it appears here once you qualify.',
+      downTitle:      'Couldn\'t load your recognitions',
+      down:           'You\'re signed in, but Elite didn\'t answer just now. Try again in a moment — nothing is shown rather than a guess.',
+    },
     tagline: 'Recognition, earned — evidence before recognition, never bought.',
     nav: {
       home:          'Home',
