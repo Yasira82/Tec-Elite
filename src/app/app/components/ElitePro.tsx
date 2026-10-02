@@ -36,6 +36,7 @@
 
 import { useEffect, useState } from 'react';
 import { TEC_COLORS } from '@yasser172/tec-ui';
+import { CancelProButton } from '@/components/pro/CancelProButton';
 
 export default function ElitePro() {
   // Reflect the real subscription (activated by commerce-service when a Pro payment
@@ -74,6 +75,7 @@ export default function ElitePro() {
             {daysRemaining <= 7 ? '⏳ ' : ''}Expires in {daysRemaining} day{daysRemaining === 1 ? '' : 's'}{daysRemaining <= 7 ? ' — re-subscribe to keep Pro (one-time monthly, no auto-renewal).' : '.'}
           </div>
         )}
+        <CancelProButton />
       </div>
     );
   }
