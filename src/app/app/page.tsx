@@ -1,5 +1,7 @@
 'use client';
 
+import { SignInGate } from '@/components/pi/SignInGate';
+
 // TEC Elite — Recognition home (C-127), read-only V1.
 // Official, criteria-based recognition from verified evidence — earned, never
 // bought. Middle link of Legend (evidence) → Elite (recognition) → VIP (experience).
@@ -14,7 +16,7 @@ import ElitePro from './components/ElitePro';
 import { BottomNav, type EliteTab } from './components/BottomNav';
 import { SettingsView } from './components/SettingsView';
 
-export default function EliteHome() {
+function EliteHome() {
   const { t } = useTranslation();
   const me = useMe();   // C19: who is asking decides what an empty page says
   const [tab, setTab] = useState<EliteTab>('home');
@@ -159,4 +161,11 @@ export default function EliteHome() {
       <BottomNav active={tab} onSelect={setTab} />
     </main>
   );
+}
+
+// The door: a sign-in button before any screen when there is no session
+// (SignInGate — C-123 §10; owner, 2026-10-06). A visit from the Hub arrives
+// signed in (§12) and goes straight through.
+export default function EliteHomeGated() {
+  return <SignInGate><EliteHome /></SignInGate>;
 }
