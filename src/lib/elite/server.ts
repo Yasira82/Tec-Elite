@@ -2,6 +2,7 @@ import {
   type Recognition, type EliteProgram, type EliteTier,
   type RecognitionStatus, type CriterionResult,
 } from './recognition';
+import { gatewayFetch } from '@/lib/gateway-fetch';
 
 // Server-only Elite backend access (C-127). Calls the real Elite read-layer
 // (identity-service) via the gateway with the inter-service key, and maps the
@@ -59,7 +60,7 @@ export interface ResolvedRecognitions {
 export async function resolveOwnRecognitions(owner: string | null): Promise<ResolvedRecognitions> {
   if (GW && owner) {
     try {
-      const res = await fetch(`${GW}/api/identity/elite/recognitions/${encodeURIComponent(owner)}`, {
+      const res = await gatewayFetch(`${GW}/api/identity/elite/recognitions/${encodeURIComponent(owner)}`, {
         headers: gwHeaders(), cache: 'no-store',
       });
       if (res.ok) {
@@ -85,7 +86,7 @@ export interface ResolvedRecognition {
 export async function resolveRecognition(id: string): Promise<ResolvedRecognition> {
   if (GW) {
     try {
-      const res = await fetch(`${GW}/api/identity/elite/recognition/${encodeURIComponent(id)}`, {
+      const res = await gatewayFetch(`${GW}/api/identity/elite/recognition/${encodeURIComponent(id)}`, {
         headers: gwHeaders(), cache: 'no-store',
       });
       if (res.ok) {
